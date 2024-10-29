@@ -1,0 +1,76 @@
+from flask import Flask, request, render_template, send_file
+import pandas as pd
+import os
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return 'No file part'
+    file = request.files['file']
+    if file.filename == '':
+        return 'No selected file'
+    if file:
+        # Lire le fichier CSV
+        df = pd.read_csv(file)
+
+        # Traduire les en-têtes de colonnes en français
+        column_translations = {
+            "Ticket ID": "ID du Ticket",
+            "Ticket Owner": "Propriétaire du Ticket",
+            "Ticket Title": "Titre du Ticket",
+            "Ticket Description": "Description du Ticket",
+            "Ticket Cause": "Cause du Ticket",
+            "Ticket Created At": "Créé le",
+            "Ticket Updated At": "Mis à jour le",
+            "Ticket Due date": "Date d'échéance",
+            "Ticket Original Team": "Équipe d'origine",
+            "Ticket Teams": "Équipes",
+            "Ticket Category": "Catégorie du Ticket",
+            "Ticket Status": "Statut du Ticket",
+            "Ticket Labels": "Étiquettes du Ticket",
+            "Ticket Indicators": "Indicateurs du Ticket",
+            "Ticket State": "État du Ticket",
+            "Ticket Archived At": "Archivé le",
+            "Task ID": "ID de la Tâche",
+            "Task Description": "Description de la Tâche",
+            "Task Author": "Auteur de la Tâche",
+            "Task Due date": "Date d'échéance de la Tâche",
+            "Task Created At": "Créée le",
+            "Task Uptdated At": "Mise à jour le",
+            "Task status": "Statut de la Tâche",
+            "Ticket Priority": "Priorité du Ticket",
+            "Ticket Zone": "Zone du Ticket",
+            "Ticket Equipment": "Équipement du Ticket",
+            "Ticket Product": "Produit du Ticket",
+            "Ticket custom_1": "Personnalisé 1",
+            "Ticket custom_2": "Personnalisé 2"
+        }
+
+        df.rename(columns=column_translations, inplace=True)
+
+        # Convertir les colonnes de dates au format jour-mois-année
+        date_columns = ["Créé le", "Mis à jour le", "Date d'échéance", 
+                        "Archivé le",  # Dates des tickets
+                        # Dates des tâches
+                        'Date d\'échéance de la Tâche', 'Créée le', 'Mise à jour le']
+
+        for col in date_columns:
+            df[col] = pd.to_datetime(df[col]).dt.strftime('%d-%m-%Y')
+
+        # Supprimer les colonnes vides
+        df.dropna(axis=1, how='all', inplace=True)
+
+        # Enregistrer le fichier au format Excel
+        output_filename = 'output.xlsx'
+        df.to_excel(output_filename, index=False)
+
+        return send_file(output_filename, as_attachment=True)
+
+if __name__ == '__main__':
+    app.run(debug=True)
