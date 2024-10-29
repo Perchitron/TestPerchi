@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Convertisseur CSV en Excel</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Convertir un fichier CSV en fichier Excel</h1>
+      <form action="/upload" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="file">Choisir un fichier CSV</label>
+          <input type="file" class="form-control" id="file" name="file">
+        </div>
+        <button type="submit" class="btn btn-primary">Convertir</button>
+      </form>
+    </div>
+  </body>
+</html>
